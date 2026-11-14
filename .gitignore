@@ -1,0 +1,7 @@
+/target
+
+# Volcados de dispositivos (datos personales; NO versionar)
+volcado-*/
+
+# Transcripciones de conversaciones (no versionar)
+conversaciones/

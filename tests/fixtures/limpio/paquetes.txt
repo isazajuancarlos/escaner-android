@@ -1,0 +1,2 @@
+package:com.whatsapp installer=com.android.vending
+package:org.mozilla.firefox installer=com.android.vending

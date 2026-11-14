@@ -1,0 +1,24 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# Autor: Juan Carlos Isaza (Isaza Arenas). Xiliux.
+[package]
+name = "escaner-android"
+version = "0.1.0"
+edition = "2021"
+description = "Escáner de higiene de seguridad para Android por ADB (defensivo, propio)."
+license = "MIT OR Apache-2.0"
+authors = ["Juan Carlos Isaza"]
+
+[[bin]]
+name = "escaner-android"
+path = "src/bin/escaner.rs"
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+
+# Las DEPENDENCIAS optimizadas también en debug (estándar de nacimiento).
+[profile.dev.package."*"]
+opt-level = 3
+
+[lints.clippy]
+redundant_clone = "deny"
+needless_collect = "deny"

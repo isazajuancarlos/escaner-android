@@ -1,0 +1,12 @@
+escaner-android
+Copyright (c) 2026 Juan Carlos Isaza (Isaza Arenas)
+
+Licensed under either of Apache License, Version 2.0 or MIT license at your option.
+SPDX-License-Identifier: MIT OR Apache-2.0
+
+Escáner de higiene de seguridad defensivo para Android (vía ADB). No es un
+antivirus ni un detector de spyware mercenario; el forense de referencia es MVT
+(Mobile Verification Toolkit) de Amnesty International.
+
+Lista de indicadores de compromiso derivada del corpus público de
+stalkerware-indicators (Echap / Coalition Against Stalkerware).

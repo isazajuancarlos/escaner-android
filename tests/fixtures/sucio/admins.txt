@@ -1,0 +1,2 @@
+Enabled Device Admins:
+  admin=ComponentInfo{com.google.android.gms/.DeviceManagementReceiver}

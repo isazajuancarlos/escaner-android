@@ -1,99 +1,83 @@
+<!-- SPDX-License-Identifier: MIT OR Apache-2.0 -->
 # escaner-android
 
-Security-hygiene scanner for Android devices over ADB (read-only, defensive). MIT OR Apache-2.0. Rust.
+Escáner de **higiene de seguridad** para Android, por ADB. Defensivo y propio:
+audita los aparatos de Juan (y de clientes del dictamen de amenaza spyware) contra
+el **95 % real** de amenazas —stalkerware, apps abusivas, sideload, parche viejo—.
 
-**English** · [Español](#español)
+## Qué NO es (léelo primero, directiva 30)
 
----
+**No es un antivirus ni un detector de Pegasus.** Un implante estatal privilegiado
+se esconde de cualquier herramienta sin privilegios; para ESO está **MVT de
+Amnesty** (el forense de verdad) y Citizen Lab / Access Now. Un informe sin
+hallazgos aquí significa *"ninguno de los indicadores cotejados"*, **no "limpio"**.
 
-## The code is not hosted here
+## Por qué por ADB y no como app en el teléfono
 
-Since August 2026 the source of this project **is not hosted on GitHub**, and it is not distributed through any package registry.
+Desde Android 11 una app instalada **no puede ver los paquetes ni los permisos de
+otras apps** (restricción de *package visibility*; `QUERY_ALL_PACKAGES` vetado en
+Play). El usuario `shell` de ADB sí (`dumpsys`, `pm`, `appops`). Por eso el escáner
+correcto corre **desde el PC por ADB**, no como APK sandboxeado: más honesto y más
+capaz.
 
-This is not abandonment, not an incident, and there was no breach. It is a decision: through 2026 the package registries and code-hosting platforms were hit by sustained, chained supply-chain attacks — the Shai-Hulud worm, ChainDrop in August, malicious extensions that exfiltrated thousands of private repositories. For a security tool, hosting the source there stopped being a neutral decision.
-
-**The licence has not changed and the code is still available to anyone who asks** — delivered with a signature and a checksum, at no cost, with no NDA, no restriction on what you publish about it, and no expiry. Request it at **xiliux.com**.
-
----
-
-## What it does
-
-`escaner-android` audits an Android device from a PC over ADB. It covers the **95% real-world** threat surface: stalkerware, abusive apps, sideloaded software, outdated security patches, and unverified boot.
-
-| Category | Signal | Severity |
-|---|---|---|
-| `ioc-stalkerware` | known stalkerware package name (Echap list) | CRITICAL |
-| `ioc-stalkerware` | stalkerware with active accessibility / device-admin / notification listener | CRITICAL |
-| `old-patch` | security patch > 6 months / > 3 months old | HIGH / MEDIUM |
-| `unverified-boot` | `ro.boot.verifiedbootstate` ≠ green | HIGH |
-| `debuggable-build` | `ro.debuggable=1` | HIGH |
-| `accessibility` / `notification-listener` / `device-admin` | active, flagged for review | MEDIUM |
-| `sideload` | third-party app installed outside the store | MEDIUM |
-| `preinstalled-bloatware` | factory system partition app outside Play | INFO |
-| `usb-debugging` / `unverified` | context / data not collected (not assumed healthy) | INFO |
-
-### Why ADB and not an installed app
-
-Since Android 11, an installed app **cannot list the packages or permissions of other apps** (`QUERY_ALL_PACKAGES` is blocked on Play). The ADB `shell` user can (`dumpsys`, `pm`, `appops`). The scanner therefore runs **from a PC over ADB** — not as a sandboxed APK: more accurate and more capable.
-
-### Honest limits
-
-**This is not an antivirus and not a Pegasus detector.** A privileged state-level implant hides from any unprivileged tool; for that, use **MVT by Amnesty International** and reach out to Citizen Lab / Access Now.
-
-**Zero findings means "none of the checked indicators were found" — not "clean".** The scanner covers common threats, not all threats. Use it as one layer of a threat-assessment workflow, not as a final verdict.
-
-### Measured quality
-
-9 tests (paired red/green per signal category) · `cargo clippy -D warnings` green · end-to-end test that launches the real binary against captured device data.
-
----
-
-## Español
-
-Escáner de **higiene de seguridad** para dispositivos Android por ADB (solo lectura, defensivo). MIT OR Apache-2.0. Rust.
-
----
-
-## El código no se publica aquí
-
-Desde agosto de 2026, el código de este proyecto **no se aloja en GitHub**, ni se distribuye por ningún registro de paquetes.
-
-No es abandono ni un incidente: es una decisión. A lo largo de 2026 los registros de paquetes y las plataformas de código han sufrido ataques encadenados de cadena de suministro —Shai-Hulud, ChainDrop en agosto, extensiones maliciosas que se llevaron miles de repositorios privados—. Alojar aquí el código de una herramienta de seguridad dejó de ser una decisión neutra.
-
-**La licencia no cambia y el código se entrega a quien lo pida**, con su firma y su suma de verificación, sin coste, sin NDA, sin restricción sobre lo que publique y sin caducidad. Solicítalo en **xiliux.com**.
-
----
-
-## Qué hace
-
-`escaner-android` audita un dispositivo Android desde el PC por ADB. Cubre el **95 % real** de las amenazas móviles: stalkerware, apps abusivas, software instalado fuera de la tienda (sideload), parches de seguridad viejos y arranque no verificado.
+## Qué mira
 
 | Categoría | Señal | Severidad |
 |---|---|---|
 | `ioc-stalkerware` | nombre de paquete de stalkerware conocido (lista Echap) | CRÍTICA |
-| `ioc-stalkerware` | stalkerware con accesibilidad / admin / listener activo | CRÍTICA |
-| `parche-viejo` | parche de seguridad > 6 meses / > 3 meses | ALTA / MEDIA |
+| `ioc-stalkerware` | ese paquete con accesibilidad/admin/listener (control activo) | CRÍTICA |
+| `parche-viejo` | `ro.build.version.security_patch` > 6 / > 3 meses | ALTA / MEDIA |
 | `arranque-no-verificado` | `ro.boot.verifiedbootstate` ≠ green | ALTA |
 | `build-debuggable` | `ro.debuggable=1` | ALTA |
 | `accesibilidad` / `listener-notificaciones` / `admin-dispositivo` | activos, para revisión | MEDIA |
-| `sideload` | app de terceros instalada fuera de la tienda | MEDIA |
-| `bloatware-preinstalado` | app de la partición de sistema fuera de Play | INFO |
+| `sideload` | app third-party instalada por fuera de la tienda (la instaló el usuario) | MEDIA |
+| `bloatware-preinstalado` | app de sistema (partición de fábrica) fuera de Play — no la instaló el usuario | INFO |
 | `depuracion-usb` / `no-verificado` | contexto / dato no recogido (no se asume sano) | INFO |
 
-### Por qué por ADB y no como app en el teléfono
+La distinción **sideload vs bloatware** usa `pm list packages -s` (apps de
+sistema): una app con instalador no‑Play que además es de sistema es bloatware
+de fábrica (INFO), no un sideload del usuario (MEDIA). Si no se pudo recoger la
+lista de sistema, todo no‑Play cae a `sideload` (dirección segura, D20/D21) y se
+avisa con `no-verificado`.
 
-Desde Android 11 una app instalada **no puede ver los paquetes ni los permisos de otras** (`QUERY_ALL_PACKAGES` vetado en Play). El usuario `shell` de ADB sí (`dumpsys`, `pm`, `appops`). Por eso el escáner corre **desde el PC por ADB**, no como APK sandboxeado: más honesto y más capaz.
+## Uso
 
-### Límites honestos
+Requiere `adb` en el PC (`sudo apt install adb`) y **Depuración USB** en el teléfono
+(Ajustes → Acerca del teléfono → tocar 7× "Número de compilación" → Opciones de
+desarrollador → Depuración USB). Comprueba con `adb devices`.
 
-**No es un antivirus ni un detector de Pegasus.** Un implante estatal privilegiado se esconde de cualquier herramienta sin privilegios. Para eso usa **MVT de Amnesty International** y contacta a Citizen Lab / Access Now.
+```bash
+# En vivo, con el teléfono conectado:
+cargo run --bin escaner-android
 
-**Cero hallazgos significa "ninguno de los indicadores cotejados fue encontrado" — no "limpio".** El escáner cubre amenazas comunes, no todas. Úsalo como una capa de un proceso de evaluación de amenazas, no como veredicto final.
+# Guardando los volcados crudos (cadena de custodia para el dictamen):
+cargo run --bin escaner-android -- --guardar ./volcado-$(date +%F)
 
-### Calidad medida
+# Offline, contra volcados ya guardados (forense / sin teléfono):
+cargo run --bin escaner-android -- --desde ./volcado-2026-09-30
 
-9 pruebas (parejas rojo/verde por categoría de señal) · `cargo clippy -D warnings` verde · prueba de extremo a extremo contra el binario real.
+# Varios dispositivos: -s <serial>
+```
 
----
+Sella el informe para la cadena de custodia: `escaner-android > informe.txt && sha256sum informe.txt`.
 
-*escaner-android* — © 2026 Juan Carlos Isaza. Licencia **MIT OR Apache-2.0**.
+## Diseño
+
+- Núcleo (`analisis`, `ioc`, `informe`, `modelo`) **puro**: de texto a hallazgos,
+  probado con parejas rojo/verde (directiva 33) y un E2E que arranca el binario
+  real (directiva 28).
+- La E/S de `adb` vive solo en `src/bin/escaner.rs`.
+- `cargo test` (9 pruebas) + `cargo clippy -- -D warnings` (verde).
+
+## Límites y pendientes
+
+- La lista de IoC es un cotejo rápido, **no exhaustiva**; actualizar contra la
+  fuente pública (Echap / Coalition Against Stalkerware) al usar en un caso real.
+- Los admins de dispositivo de Google (Find My Device) salen como MEDIA "para
+  revisión": es ruido leve aceptable; una lista blanca de admins de sistema
+  conocidos lo bajaría a INFO (pendiente).
+- La distinción sideload vs bloatware preinstalado ya está hecha (2026-09-30,
+  validada contra el ZTE real: los stubs de Facebook de fábrica bajan a INFO).
+- El complemento forense es **MVT** por ADB/backup, encima de este escáner.
+
+Titularidad: Isaza Arenas (Xiliux). MIT OR Apache-2.0.

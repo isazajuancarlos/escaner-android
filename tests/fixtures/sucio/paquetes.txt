@@ -1,0 +1,3 @@
+package:com.whatsapp installer=com.android.vending
+package:com.thetruthspy.android installer=com.android.packageinstaller
+package:com.raro.apk installer=com.android.packageinstaller
